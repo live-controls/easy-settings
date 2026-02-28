@@ -8,15 +8,10 @@ class EasySettingsServiceProvider extends ServiceProvider
 {
   public function register()
   {
-    $this->mergeConfigFrom(__DIR__.'/../config/config.php', 'livecontrols_easysettings');
   }
 
   public function boot()
   {
-    $this->publishes([
-      __DIR__.'/../config/config.php' => config_path('livecontrols_easysettings.php'),
-    ], 'livecontrols.easysettings.config');
-
     if ($this->app->runningInConsole()) {
       if (!class_exists('CreateEasySettingsTable')){
         $this->publishes([
