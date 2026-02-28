@@ -28,17 +28,17 @@ class EasySettings
      *
      * @param string $key
      * @param mixed $default
-     * @param integer|null|null $cacheForSeconds
+     * @param integer|null $cacheForSeconds If set to NULL it will cache forever, if set to 0 it will not cache
      * @return mixed
      */
-    public static function get(string $key, mixed $default = null, int|null $cacheForSeconds = null): mixed
+    public static function get(string $key, mixed $default = null, int|null $cacheForSeconds = 0): mixed
     {
-        if(!empty($cacheForSeconds)){
-            return Cache::remember('easy-settings-'.$key, $cacheForSeconds, function() use($key, $default){
-                return EasySettingsModel::find($key) ?? $default;
-            });
+        if($cacheForSeconds === 0){
+            return EasySettingsModel::find($key)?->value ?? $default;
+        }else if($cacheForSeconds !== null){
+            return Cache::remember('easy-settings-'.$key, $cacheForSeconds, fn () => EasySettingsModel::find($key)?->value ?? $default);
         }
-        return EasySettingsModel::find($key) ?? $default;
+        return Cache::rememberForever('easy-settings-'.$key, fn () => EasySettingsModel::find($key)?->value ?? $default);
     }
 
     /**

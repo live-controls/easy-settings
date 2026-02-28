@@ -14,8 +14,13 @@ class EasySettingsModel extends Model
     public $incrementing = false;
     protected $keyType = 'string';
     public $timestamps = false;
+    
     protected $fillable = [
         'key',
         'value',
+    ];
+
+    protected $casts = [
+        'value' => 'json',
     ];
 }
