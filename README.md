@@ -33,5 +33,5 @@ This will remove the setting with the specific key from the cache.
 #### Delete settings
 This will delete the setting with the specific key from the database and cache.
 ```ps
-\LiveControls\EasySettings\EasySettings::forget('key');
+\LiveControls\EasySettings\EasySettings::delete('key');
 ```
