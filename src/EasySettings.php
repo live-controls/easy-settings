@@ -2,11 +2,19 @@
 
 namespace LiveControls\EasySettings;
 
+use Exception;
 use Illuminate\Support\Facades\Cache;
 use LiveControls\EasySettings\Models\EasySettingsModel;
 
-class EasySettings
+final class EasySettings
 {
+    /**
+     * The prefix used for settings stored inside the cache
+     *
+     * @var string
+     */
+    private static string $cachePrefix = "easy-settings";
+
     /**
      * Sets the setting with a certain key and value to the database.
      *
@@ -36,9 +44,9 @@ class EasySettings
         if($cacheForSeconds === 0){
             return EasySettingsModel::find($key)?->value ?? $default;
         }else if($cacheForSeconds !== null){
-            return Cache::remember('easy-settings-'.$key, $cacheForSeconds, fn () => EasySettingsModel::find($key)?->value ?? $default);
+            return Cache::remember(self::$cachePrefix.'-'.$key, $cacheForSeconds, fn () => EasySettingsModel::find($key)?->value ?? $default);
         }
-        return Cache::rememberForever('easy-settings-'.$key, fn () => EasySettingsModel::find($key)?->value ?? $default);
+        return Cache::rememberForever(self::$cachePrefix.'-'.$key, fn () => EasySettingsModel::find($key)?->value ?? $default);
     }
 
     /**
@@ -49,6 +57,24 @@ class EasySettings
      */
     public static function forget(string $key): void
     {
-        Cache::forget('easy-settings-'.$key);
+        Cache::forget(self::$cachePrefix.'-'.$key);
+    }
+
+    /**
+     * Deletes the setting from the database and forgets it inside the cache.
+     *
+     * @param string $key
+     * @return void
+     */
+    public static function delete(string $key): void
+    {
+        $model = EasySettingsModel::find($key);
+        if(is_null($model)){
+            return;
+        }
+        if(!$model->delete()){
+            throw new Exception("Couldn't delete EasySetting with key \"{$key}\"!");
+        }
+        self::forget($key);
     }
 }
